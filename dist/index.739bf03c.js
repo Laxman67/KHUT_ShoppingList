@@ -584,18 +584,59 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"ebWYT":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _item = require("./Item");
-var _itemDefault = parcelHelpers.interopDefault(_item);
+var _model = require("./model");
+var _view = require("./view");
 const itemInput = document.querySelector("input[name='itemInput']");
 const shoppingListDiv = document.querySelector(".shopping-list");
 const completedDiv = document.querySelector(".completed");
 const clearCompletedBtn = document.querySelector("#clear-completed");
 itemInput.addEventListener("keyup", (evt)=>{
-    if (evt.key == "Enter") evt.target.value = "";
+    if (evt.key == "Enter") {
+        // Add to shopping List
+        (0, _model.addToShoppingList)(evt.target.value);
+        evt.target.value = "";
+        // Update View
+        (0, _view.renderShoppingList)();
+    }
+});
+shoppingListDiv.addEventListener("click", function(evt) {
+    if (evt.target.parentElement.classList.contains("priority-control")) {
+        const priority = evt.target.classList.value;
+        const itemId = evt.target.parentElement.parentElement.getAttribute("data-id");
+        // Set Priority
+        (0, _model.setPriority)(itemId, priority);
+        // Update View
+        (0, _view.renderShoppingList)();
+    }
 });
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./Item":"kap7m"}],"gkKU3":[function(require,module,exports) {
+},{"./model":"Y4A21","./view":"ky8MP"}],"Y4A21":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "addToShoppingList", ()=>addToShoppingList);
+parcelHelpers.export(exports, "setPriority", ()=>setPriority);
+parcelHelpers.export(exports, "getShoppingList", ()=>getShoppingList);
+let shoppingList = [];
+const addToShoppingList = (item)=>{
+    const itemId = `${parseInt(Math.random() * 10000000)}-${new Date().getTime()}`;
+    shoppingList.push({
+        id: itemId,
+        item,
+        priority: "normal"
+    });
+};
+const setPriority = (itemId, priority)=>{
+    shoppingList = shoppingList.map((item)=>{
+        if (item.id === itemId) return {
+            ...item,
+            priority
+        };
+        return item;
+    });
+};
+const getShoppingList = ()=>shoppingList;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -625,7 +666,22 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"kap7m":[function(require,module,exports) {
+},{}],"ky8MP":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "renderShoppingList", ()=>renderShoppingList);
+var _item = require("./Item");
+var _itemDefault = parcelHelpers.interopDefault(_item);
+var _model = require("./model");
+const shoppingListDiv = document.querySelector(".shopping-list");
+const renderShoppingList = ()=>{
+    const domNodes = (0, _model.getShoppingList)().map(({ item, priority, id })=>{
+        return (0, _itemDefault.default)(item, priority, id);
+    });
+    shoppingListDiv.innerHTML = domNodes.join(" ");
+};
+
+},{"./Item":"kap7m","./model":"Y4A21","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kap7m":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 const Item = (title, priority = "normal", id)=>{
